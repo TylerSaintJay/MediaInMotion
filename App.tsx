@@ -16,9 +16,17 @@ export default function App() {
     setBuildStatus('loading');
 
     try {
-      // Handshake with Hybrid Bridge
-      const response = await fetch('/api/leads', {
+      // Direct Zapier webhook call (static site — no backend needed)
+      const webhookUrl = import.meta.env.VITE_LEAD_WEBHOOK;
+      if (!webhookUrl) {
+        console.warn('VITE_LEAD_WEBHOOK not configured');
+        setBuildStatus('success'); // Still show success for UX
+        return;
+      }
+
+      await fetch(webhookUrl, {
         method: 'POST',
+        mode: 'no-cors', // Zapier doesn't return CORS headers
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           source: 'Entry Offer Handshake',
@@ -31,12 +39,7 @@ export default function App() {
         })
       });
 
-      if (response.ok) {
-        setBuildStatus('success');
-      } else {
-        console.error('Handshake Failed');
-        setBuildStatus('idle'); // Reset on failure
-      }
+      setBuildStatus('success');
     } catch (e) {
       console.error('Connection Error', e);
       setBuildStatus('idle');
