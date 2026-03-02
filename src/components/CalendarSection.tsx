@@ -1,7 +1,9 @@
+'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { CalendarCheck, ArrowDown } from 'lucide-react';
+import { getCalApi } from "@calcom/embed-react";
 
 export const CalendarSection = () => {
     const sectionRef = useRef<HTMLDivElement>(null);
@@ -10,38 +12,41 @@ export const CalendarSection = () => {
     const [calLoaded, setCalLoaded] = useState(false);
 
     useEffect(() => {
-        if (!isInView || calLoaded) return;
+        // Client-Only Guard: Ensures window object is ready
+        if (!isInView || calLoaded || typeof window === 'undefined') return;
 
-        // Lazy-load the Cal.com embed script only when section is in view
-        const script = document.createElement('script');
-        script.src = 'https://app.cal.com/embed/embed.js';
-        script.async = true;
-        script.onload = () => {
-            // @ts-ignore – Cal global injected by embed script
-            if (window.Cal) {
-                // @ts-ignore
-                window.Cal("init", "growth-audit", { origin: "https://cal.com" });
+        let calInstance: any = null;
+        const cleanupCallback = () => {
+            window.location.href = "https://mediainmocion.com/thank-you";
+        };
 
-                // @ts-ignore
-                window.Cal("inline", {
+        (async function loadCal() {
+            try {
+                const cal = await getCalApi();
+
+                if (!cal) return;
+                calInstance = cal;
+
+                // Namespace Safety: Prevent conflicts with other scripts
+                cal("init", "audit", { origin: "https://cal.com" });
+
+                // The "Preload" Command: Triggers data fetch early
+                cal("preload", { calLink: "tyler-jay-b2hnuo/growth-audit" });
+
+                cal("inline", {
                     elementOrSelector: "#cal-inline-embed",
                     calLink: "tyler-jay-b2hnuo/growth-audit",
-                    layout: "month_view",
                     config: {
                         theme: "dark",
                     },
                 });
 
-                // @ts-ignore – Configure success redirect
-                window.Cal("on", {
+                cal("on", {
                     action: "bookingSuccessful",
-                    callback: () => {
-                        window.location.href = "https://mediainmocion.com/thank-you";
-                    },
+                    callback: cleanupCallback,
                 });
 
-                // @ts-ignore – Hide badge branding
-                window.Cal("ui", {
+                cal("ui", {
                     theme: "dark",
                     styles: { branding: { brandColor: "#1E90FF" } },
                     hideEventTypeDetails: false,
@@ -49,14 +54,16 @@ export const CalendarSection = () => {
                 });
 
                 setCalLoaded(true);
+            } catch (err) {
+                console.error("Cal.com embed failed to load", err);
             }
-        };
-        document.head.appendChild(script);
+        })();
 
+        // Clean Up is inherently managed by avoiding duplicate inits 
+        // through our `calLoaded` state guard & `getCalApi` singleton handling.
         return () => {
-            // Cleanup if component unmounts before script loads
-            if (document.head.contains(script)) {
-                document.head.removeChild(script);
+            if (calInstance) {
+                calInstance("off", { action: "bookingSuccessful", callback: cleanupCallback });
             }
         };
     }, [isInView, calLoaded]);
@@ -65,10 +72,10 @@ export const CalendarSection = () => {
         <section
             id="strategy-session"
             ref={sectionRef}
-            className="relative py-32 px-6 overflow-hidden"
+            className="relative py-32 px-6"
         >
             {/* Background Glow */}
-            <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] bg-[#1E90FF]/8 blur-[180px] rounded-full" />
                 <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#1E90FF]/30 to-transparent" />
             </div>
@@ -109,12 +116,12 @@ export const CalendarSection = () => {
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6, ease: "circOut" }}
-                    className="relative rounded-3xl overflow-hidden border border-white/10 bg-zinc-950/60 backdrop-blur-xl shadow-[0_0_80px_-20px_rgba(30,144,255,0.15)]"
-                    style={{ isolation: 'isolate' }}
+                    className="relative rounded-3xl border border-white/10 bg-zinc-950/60 backdrop-blur-xl shadow-[0_0_80px_-20px_rgba(30,144,255,0.15)]"
+                    style={{ isolation: 'isolate', minHeight: '800px', zIndex: 50 }}
                 >
                     {/* Skeleton Loader – visible until Cal loads */}
                     {!calLoaded && (
-                        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-zinc-950/80 backdrop-blur-md">
+                        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-zinc-950/80 backdrop-blur-md rounded-3xl">
                             <div className="w-10 h-10 border-2 border-[#1E90FF]/30 border-t-[#1E90FF] rounded-full animate-spin mb-4" />
                             <p className="text-zinc-500 font-inter text-sm uppercase tracking-widest font-bold">Loading Calendar...</p>
                         </div>
@@ -124,11 +131,8 @@ export const CalendarSection = () => {
                     <div
                         id="cal-inline-embed"
                         ref={calContainerRef}
-                        className="w-full"
-                        style={{
-                            minHeight: '700px',
-                            overflow: 'hidden',
-                        }}
+                        className="w-full h-full"
+                        style={{ minHeight: '800px' }}
                     />
                 </motion.div>
 

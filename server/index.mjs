@@ -15,11 +15,7 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Set MIME types explicitly for Hostinger/VPS environments
-express.static.mime.define({
-    'application/javascript': ['js', 'mjs'],
-    'text/css': ['css']
-});
+// Mime types are handled by default or via headers in the static middleware below
 
 // Middleware
 app.use(cors());
@@ -39,7 +35,7 @@ app.use('/api', apiRoutes);
 
 // Catch-all route to serve the SPA (React) for any non-API request
 // Important: Only serve index.html if the request doesn't look like an asset (has no file extension)
-app.get('*', (req, res) => {
+app.get('{*path}', (req, res) => {
     // If request contains a dot (e.g. .js, .css, .png), it's a missing asset, don't serve HTML
     if (req.path.includes('.')) {
         res.status(404).end();
