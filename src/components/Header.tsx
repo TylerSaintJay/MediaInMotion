@@ -1,9 +1,15 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, CheckCircle2, Menu, X, ShoppingBag } from 'lucide-react';
+import { Menu, X, CalendarCheck } from 'lucide-react';
 
-export const Header = ({ buildStatus, handleBuildAsset, isMobileMenuOpen, setIsMobileMenuOpen }) => {
+interface HeaderProps {
+    scrollToCalendar: (e?: React.MouseEvent) => void;
+    isMobileMenuOpen: boolean;
+    setIsMobileMenuOpen: (v: boolean) => void;
+}
+
+export const Header = ({ scrollToCalendar, isMobileMenuOpen, setIsMobileMenuOpen }: HeaderProps) => {
     const [scrolled, setScrolled] = useState(false);
 
     useEffect(() => {
@@ -11,6 +17,14 @@ export const Header = ({ buildStatus, handleBuildAsset, isMobileMenuOpen, setIsM
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
+
+    const navItems = [
+        { label: 'Our Approach', href: '#approach' },
+        { label: 'Results', href: '#performance' },
+        { label: 'Services', href: '#infrastructure' },
+        { label: 'Insights', href: '#strategy' },
+        { label: 'Book a Call', href: '#strategy-session' },
+    ];
 
     return (
         <>
@@ -25,10 +39,15 @@ export const Header = ({ buildStatus, handleBuildAsset, isMobileMenuOpen, setIsM
 
                 {/* Desktop Nav */}
                 <div className="hidden md:flex items-center gap-8">
-                    {[{ label: 'Our Approach', href: '#approach' }, { label: 'Results', href: '#performance' }, { label: 'Services', href: '#infrastructure' }, { label: 'Insights', href: '#strategy' }].map((item, i) => (
+                    {navItems.map((item, i) => (
                         <motion.a
                             key={item.label}
                             href={item.href}
+                            onClick={(e) => {
+                                e.preventDefault();
+                                const el = document.querySelector(item.href);
+                                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            }}
                             initial={{ opacity: 0, y: -20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.1 * i }}
@@ -40,16 +59,15 @@ export const Header = ({ buildStatus, handleBuildAsset, isMobileMenuOpen, setIsM
                     ))}
 
                     <motion.button
-                        onClick={handleBuildAsset}
+                        onClick={scrollToCalendar}
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        className={`px-6 py-2 bg-gradient-to-r ${buildStatus === 'success' ? 'from-green-500 to-emerald-600' : 'from-[#1E90FF] to-[#0066CC]'} text-white font-bold transition-all shadow-lg ${buildStatus === 'success' ? 'shadow-green-500/20' : 'shadow-[#1E90FF]/20'} flex items-center gap-2 min-w-[150px] justify-center rounded-lg`}
+                        className="px-6 py-2 bg-gradient-to-r from-[#1E90FF] to-[#0066CC] text-white font-bold transition-all shadow-lg shadow-[#1E90FF]/20 flex items-center gap-2 min-w-[150px] justify-center rounded-lg"
                     >
-                        {buildStatus === 'idle' && "Get Started"}
-                        {buildStatus === 'loading' && <Loader2 className="w-5 h-5 animate-spin" />}
-                        {buildStatus === 'success' && <><CheckCircle2 className="w-5 h-5" /> Built</>}
+                        <CalendarCheck className="w-4 h-4" />
+                        Get Started
                     </motion.button>
                 </div>
 
@@ -71,24 +89,30 @@ export const Header = ({ buildStatus, handleBuildAsset, isMobileMenuOpen, setIsM
                         exit={{ opacity: 0, y: -20 }}
                         className="fixed inset-0 z-40 bg-zinc-950/95 backdrop-blur-xl md:hidden pt-32 px-6 flex flex-col gap-8"
                     >
-                        {[{ label: 'Our Approach', href: '#approach' }, { label: 'Results', href: '#performance' }, { label: 'Services', href: '#infrastructure' }, { label: 'Insights', href: '#strategy' }].map((item) => (
+                        {navItems.map((item) => (
                             <a
                                 key={item.label}
                                 href={item.href}
-                                onClick={() => setIsMobileMenuOpen(false)}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    setIsMobileMenuOpen(false);
+                                    const el = document.querySelector(item.href);
+                                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                }}
                                 className="text-3xl font-bodoni font-bold hover:text-[#1E90FF] transition-colors"
                             >
                                 {item.label}
                             </a>
                         ))}
                         <button
-                            onClick={() => {
-                                handleBuildAsset();
+                            onClick={(e) => {
                                 setIsMobileMenuOpen(false);
+                                scrollToCalendar(e);
                             }}
-                            className="w-full py-4 bg-[#1E90FF] rounded-xl font-bold uppercase tracking-widest text-white mt-4"
+                            className="w-full py-4 bg-[#1E90FF] rounded-xl font-bold uppercase tracking-widest text-white mt-4 flex items-center justify-center gap-3"
                         >
-                            Get Started
+                            <CalendarCheck className="w-5 h-5" />
+                            Book Your Audit
                         </button>
                     </motion.div>
                 )}

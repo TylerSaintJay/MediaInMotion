@@ -1,9 +1,9 @@
 
 import React from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { Activity, Zap, Loader2, CheckCircle2 } from 'lucide-react';
+import { Activity, Zap, CalendarCheck } from 'lucide-react';
 
-export const Hero = ({ buildStatus, handleBuildAsset }: { buildStatus: string, handleBuildAsset: () => void }) => {
+export const Hero = ({ scrollToCalendar }: { scrollToCalendar: (e?: React.MouseEvent) => void }) => {
     const { scrollYProgress } = useScroll();
     const heroOpacity = useTransform(scrollYProgress, [0, 0.15], [1, 0]);
     const heroScale = useTransform(scrollYProgress, [0, 0.15], [1, 0.92]);
@@ -47,25 +47,29 @@ export const Hero = ({ buildStatus, handleBuildAsset }: { buildStatus: string, h
                     className="flex flex-col sm:flex-row gap-6 justify-center"
                 >
                     <motion.button
-                        onClick={handleBuildAsset}
+                        onClick={scrollToCalendar}
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        className={`group relative px-10 py-5 ${buildStatus === 'success' ? 'bg-green-600' : 'bg-[#1E90FF]'} rounded-lg shadow-[0_0_40px_-10px_rgba(30,144,255,0.5)] overflow-hidden transition-colors duration-500`}
+                        className="group relative px-10 py-5 bg-[#1E90FF] rounded-lg shadow-[0_0_40px_-10px_rgba(30,144,255,0.5)] overflow-hidden transition-colors duration-500"
                     >
                         <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out" />
                         <span className="relative z-10 font-inter font-bold uppercase tracking-widest text-sm flex items-center gap-3 text-white">
-                            {buildStatus === 'idle' && <>Start Your Growth <Zap className="w-4 h-4 fill-white group-hover:scale-125 transition-transform" /></>}
-                            {buildStatus === 'loading' && <Loader2 className="w-5 h-5 animate-spin" />}
-                            {buildStatus === 'success' && <div className="flex items-center gap-2"><CheckCircle2 className="w-5 h-5" /> Built</div>}
+                            Claim My Audit <CalendarCheck className="w-4 h-4 group-hover:scale-125 transition-transform" />
                         </span>
                     </motion.button>
-                    <motion.button
+                    <motion.a
+                        href="#approach"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            const el = document.getElementById('approach');
+                            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }}
                         whileHover={{ scale: 1.05, borderColor: "rgba(255,255,255,0.5)" }}
                         whileTap={{ scale: 0.95 }}
-                        className="px-10 py-5 border border-white/10 glass-panel rounded-lg transition-all font-inter font-bold uppercase tracking-widest text-sm text-zinc-300 hover:text-white"
+                        className="px-10 py-5 border border-white/10 glass-panel rounded-lg transition-all font-inter font-bold uppercase tracking-widest text-sm text-zinc-300 hover:text-white cursor-pointer inline-flex items-center justify-center"
                     >
                         See How It Works
-                    </motion.button>
+                    </motion.a>
                 </motion.div>
             </motion.div>
 

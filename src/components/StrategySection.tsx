@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, useInView } from 'framer-motion';
-import { Target, BarChart3, Activity, Maximize2, ShieldCheck, Globe2, ArrowUpRight, Loader2, CheckCircle2 } from 'lucide-react';
+import { Target, BarChart3, Activity, Maximize2, ShieldCheck, Globe2, ArrowUpRight, CalendarCheck } from 'lucide-react';
 
 const CountUp = ({ value, suffix = "", prefix = "" }: { value: number, suffix?: string, prefix?: string }) => {
     const [displayValue, setDisplayValue] = useState(0);
@@ -70,7 +70,7 @@ const StrategyDeliverable = ({ title, icon: Icon, children }: { title: string, i
     </motion.div>
 );
 
-export const StrategySection = ({ buildStatus, handleBuildAsset }: { buildStatus: string, handleBuildAsset: () => void }) => {
+export const StrategySection = ({ scrollToCalendar }: { scrollToCalendar: (e?: React.MouseEvent) => void }) => {
     return (
         <>
             {/* --- Proof Section --- */}
@@ -242,15 +242,13 @@ export const StrategySection = ({ buildStatus, handleBuildAsset }: { buildStatus
                         Your future customers are searching for you right now. Let's make sure they find you — and that when they do, they can not look away.
                     </p>
                     <motion.button
-                        onClick={handleBuildAsset}
+                        onClick={scrollToCalendar}
                         whileHover={{ scale: 1.05, boxShadow: "0 0 50px rgba(30,144,255,0.4)" }}
                         whileTap={{ scale: 0.95 }}
-                        className={`group relative ${buildStatus === 'success' ? 'bg-green-600' : 'bg-[#1E90FF]'} px-16 py-8 rounded-2xl overflow-hidden transition-colors duration-500`}
+                        className="group relative bg-[#1E90FF] px-16 py-8 rounded-2xl overflow-hidden transition-colors duration-500"
                     >
                         <span className="relative z-10 font-inter font-black uppercase tracking-[0.4em] flex items-center gap-4 text-white text-lg">
-                            {buildStatus === 'idle' && <>Start Your Transformation <ArrowUpRight className="w-6 h-6 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" /></>}
-                            {buildStatus === 'loading' && <Loader2 className="w-6 h-6 animate-spin" />}
-                            {buildStatus === 'success' && <><CheckCircle2 className="w-6 h-6" /> You're In</>}
+                            Book Now <CalendarCheck className="w-6 h-6 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
                         </span>
                         <motion.div
                             animate={{ x: ['-100%', '100%'] }}
