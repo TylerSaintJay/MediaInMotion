@@ -48,6 +48,8 @@ export const Hero = ({ scrollToCalendar }: { scrollToCalendar: (e?: React.MouseE
                 >
                     <motion.button
                         onClick={scrollToCalendar}
+                        data-cal-link="tyler-jay-b2hnuo/growth-audit"
+                        data-cal-config='{"theme":"dark"}'
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         className="group relative px-10 py-5 bg-[#1E90FF] rounded-lg shadow-[0_0_40px_-10px_rgba(30,144,255,0.5)] overflow-hidden transition-colors duration-500"

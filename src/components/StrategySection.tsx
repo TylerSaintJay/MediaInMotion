@@ -243,6 +243,8 @@ export const StrategySection = ({ scrollToCalendar }: { scrollToCalendar: (e?: R
                     </p>
                     <motion.button
                         onClick={scrollToCalendar}
+                        data-cal-link="tyler-jay-b2hnuo/growth-audit"
+                        data-cal-config='{"theme":"dark"}'
                         whileHover={{ scale: 1.05, boxShadow: "0 0 50px rgba(30,144,255,0.4)" }}
                         whileTap={{ scale: 0.95 }}
                         className="group relative bg-[#1E90FF] px-16 py-8 rounded-2xl overflow-hidden transition-colors duration-500"

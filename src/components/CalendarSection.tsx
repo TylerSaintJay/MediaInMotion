@@ -11,8 +11,28 @@ export const CalendarSection = () => {
     const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
     const [calLoaded, setCalLoaded] = useState(false);
 
+    // Effect 1: Global Cal.com SDK initialization for popups
     useEffect(() => {
-        // Client-Only Guard: Ensures window object is ready
+        (async function initCal() {
+            try {
+                const cal = await getCalApi();
+                if (cal) {
+                    cal("init", { origin: "https://cal.com" });
+                    cal("ui", {
+                        theme: "dark",
+                        styles: { branding: { brandColor: "#1E90FF" } },
+                        hideEventTypeDetails: false,
+                        layout: "month_view",
+                    });
+                }
+            } catch (err) {
+                console.error("Cal.com SDK failed to initialize", err);
+            }
+        })();
+    }, []);
+
+    // Effect 2: Inline embed loading when in view
+    useEffect(() => {
         if (!isInView || calLoaded || typeof window === 'undefined') return;
 
         let calInstance: any = null;
@@ -20,18 +40,11 @@ export const CalendarSection = () => {
             window.location.href = "https://mediainmocion.com/thank-you";
         };
 
-        (async function loadCal() {
+        (async function loadInlineCal() {
             try {
                 const cal = await getCalApi();
-
                 if (!cal) return;
                 calInstance = cal;
-
-                // Namespace Safety: Prevent conflicts with other scripts
-                cal("init", "audit", { origin: "https://cal.com" });
-
-                // The "Preload" Command: Triggers data fetch early
-                cal("preload", { calLink: "tyler-jay-b2hnuo/growth-audit" });
 
                 cal("inline", {
                     elementOrSelector: "#cal-inline-embed",
@@ -46,21 +59,12 @@ export const CalendarSection = () => {
                     callback: cleanupCallback,
                 });
 
-                cal("ui", {
-                    theme: "dark",
-                    styles: { branding: { brandColor: "#1E90FF" } },
-                    hideEventTypeDetails: false,
-                    layout: "month_view",
-                });
-
                 setCalLoaded(true);
             } catch (err) {
-                console.error("Cal.com embed failed to load", err);
+                console.error("Cal.com inline embed failed", err);
             }
         })();
 
-        // Clean Up is inherently managed by avoiding duplicate inits 
-        // through our `calLoaded` state guard & `getCalApi` singleton handling.
         return () => {
             if (calInstance) {
                 calInstance("off", { action: "bookingSuccessful", callback: cleanupCallback });

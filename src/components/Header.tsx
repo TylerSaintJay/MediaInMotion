@@ -60,6 +60,8 @@ export const Header = ({ scrollToCalendar, isMobileMenuOpen, setIsMobileMenuOpen
 
                     <motion.button
                         onClick={scrollToCalendar}
+                        data-cal-link="tyler-jay-b2hnuo/growth-audit"
+                        data-cal-config='{"theme":"dark"}'
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         whileHover={{ scale: 1.05 }}
